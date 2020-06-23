@@ -1,0 +1,98 @@
+//Separé el test en 2 porque me pareció muy extenso en un solo archivo
+
+import marcas.*
+import personas.*
+import carpas.*
+
+test "requerimientosAvanzados" {
+	
+	const carpaHofbrau = new Carpa(limiteDeGente = 3, cervezaQueVende = new CervezaRubia(marca = hofbrau),tieneMusica = true)
+	const carpaBakalar = new Carpa(limiteDeGente = 5, cervezaQueVende = new CervezaRoja(marca = bakalar), tieneMusica = true)
+	const carpaStella = new Carpa(limiteDeGente = 4, cervezaQueVende = new CervezaRubia(marca = stellaArtois), tieneMusica = true)
+	const carpaKrusovice = new Carpa(limiteDeGente = 6, cervezaQueVende = new CervezaNegra(marca = krusovice12), tieneMusica = true)
+	const hans = new Belga(peso = 73, nivelDeAguante = 6)
+	const beatriz = new Belga(peso = 67, nivelDeAguante = 4)
+	const remy = new Checo(peso = 80, nivelDeAguante = 20)
+	const anna = new Checo(peso = 64, nivelDeAguante = 8)
+	const helga = new Aleman(peso = 55, nivelDeAguante = 9)
+	const armand = new Aleman(peso = 91, nivelDeAguante = 12)
+	const ruben = new Belga(peso = 70, nivelDeAguante = 10)
+	
+	ruben.entrar(carpaKrusovice)
+	beatriz.entrar(carpaKrusovice)
+	hans.entrar(carpaKrusovice)
+	armand.entrar(carpaBakalar)
+	remy.entrar(carpaBakalar)
+	anna.entrar(carpaBakalar)
+	
+	assert.that(carpaKrusovice.esHomogenea())
+	assert.notThat(carpaBakalar.esHomogenea())
+	
+	carpaKrusovice.servir(ruben, 0.5)
+	carpaKrusovice.servir(beatriz, 1)
+	carpaKrusovice.servir(hans, 0.5)
+	carpaBakalar.servir(armand, 0.5)
+	carpaBakalar.servir(remy, 1)
+	carpaBakalar.servir(anna, 0.5)
+	
+	assert.equals(58.5, ruben.gastoTotalEnCerveza())
+	assert.equals(117, beatriz.gastoTotalEnCerveza())
+	assert.equals(58.5, hans.gastoTotalEnCerveza())
+	assert.equals(56.55, armand.gastoTotalEnCerveza())
+	assert.equals(113.1, remy.gastoTotalEnCerveza())
+	assert.equals(56.55, anna.gastoTotalEnCerveza())
+	
+	ruben.salirDeCarpa()
+	carpaKrusovice.tipoDeRecargo(recargoPorCantidad)
+	carpaKrusovice.servir(beatriz, 0.5)
+	
+	assert.equals(112.5, carpaKrusovice.precioDeVenta())
+	assert.equals(173.25, beatriz.gastoTotalEnCerveza())
+		
+	
+	ruben.entrar(carpaBakalar)
+	carpaBakalar.servir(ruben, 0.5)
+	armand.salirDeCarpa()
+	armand.entrar(carpaStella)
+	carpaStella.servir(armand, 0.5)
+	armand.salirDeCarpa()
+	armand.entrar(carpaKrusovice)
+	
+	assert.equals(126, carpaKrusovice.precioDeVenta())
+	assert.equals(33.33333, carpaKrusovice.porcentajeDeEbriedad())
+	
+	carpaKrusovice.tipoDeRecargo(recargoPorEbriedad)
+	assert.equals(108, carpaKrusovice.precioDeVenta())
+	
+	
+	carpaKrusovice.servir(armand, 1)
+	ruben.salirDeCarpa()
+	ruben.entrar(carpaHofbrau)
+	carpaHofbrau.servir(ruben, 0.5)
+	anna.salirDeCarpa()
+	anna.entrar(carpaKrusovice)
+	carpaKrusovice.servir(anna, 1)
+	helga.entrar(carpaKrusovice)
+	ruben.salirDeCarpa()
+	ruben.entrar(carpaKrusovice)
+	assert.equals([helga],carpaKrusovice.quienesNoTomaron())
+	
+	carpaKrusovice.unaRonda()
+	
+	assert.equals(83.33333, carpaKrusovice.porcentajeDeEbriedad())
+	assert.equals(135, carpaKrusovice.precioDeVenta())
+	assert.equals([carpaKrusovice,carpaBakalar,carpaHofbrau],ruben.enQueCarpasTomo())
+	assert.that(armand.esCompatibleCon(ruben))
+	assert.notThat(anna.esCompatibleCon(remy))
+	assert.equals([beatriz,hans,armand,anna,helga,ruben],carpaKrusovice.personasEnCarpa())
+	assert.that(anna.estaEntrandoEnVicio())
+	assert.that(armand.estaEntrandoEnVicio())
+	assert.notThat(remy.estaEntrandoEnVicio())
+	assert.notThat(helga.estaEntrandoEnVicio())
+	
+	carpaKrusovice.servir(armand, 1)
+	
+	assert.equals(108,ruben.jarraMasCara())
+	assert.equals(135,armand.jarraMasCara())
+	
+}

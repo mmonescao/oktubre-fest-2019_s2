@@ -1,0 +1,130 @@
+//Un belga, un checo y un aleman entran a un bar...
+
+import marcas.*
+import personas.*
+import carpas.*
+
+test "oktober" {
+	
+	const carpaHofbrau = new Carpa(limiteDeGente = 3, cervezaQueVende = new CervezaRubia(marca = hofbrau))
+	const carpaBakalar = new Carpa(limiteDeGente = 5, cervezaQueVende = new CervezaRoja(marca = bakalar), tieneMusica = true)
+	const carpaErdinger = new Carpa(limiteDeGente = 4, cervezaQueVende = new CervezaNegra(marca = erdinger))
+	const carpaKrusovice = new Carpa(limiteDeGente = 6, cervezaQueVende = new CervezaRoja(marca = krusovice12))
+	const carpaStella = new Carpa(limiteDeGente = 4, cervezaQueVende = new CervezaRubia(marca = stellaArtois), tieneMusica = true)
+	const carpaCaulier = new Carpa(limiteDeGente = 2, cervezaQueVende = new CervezaNegra(marca = caulier), tieneMusica = true)
+	const hans = new Belga(peso = 73, nivelDeAguante = 6)
+	const beatriz = new Belga(peso = 67, nivelDeAguante = 4, leGustaLaMusica = false)
+	const remy = new Checo(peso = 80, nivelDeAguante = 20, leGustaLaMusica = false)
+	const anna = new Checo(peso = 64, nivelDeAguante = 8)
+	const helga = new Aleman(peso = 55, nivelDeAguante = 9)
+	const armand = new Aleman(peso = 91, nivelDeAguante = 12, leGustaLaMusica = false)
+	
+	//1
+	const jarra1 = new Jarra(cerveza = new CervezaRubia(marca = hofbrau),litrosDeJarra = 0.5,deLaCarpa = carpaHofbrau)
+
+	assert.equals(0.04, jarra1.contenidoDeAlcohol())
+	
+	//2
+	const jarra2 = new Jarra(cerveza = new CervezaRubia(marca = hofbrau),litrosDeJarra = 1,deLaCarpa = carpaHofbrau)
+	hans.tomar(jarra1)
+	hans.tomar(jarra2)
+	
+	assert.equals(0.12, hans.alcoholIngerido())
+	
+	//3
+	const jarra3 = new Jarra(cerveza = new CervezaRubia(marca = bakalar),litrosDeJarra = 1,deLaCarpa = carpaBakalar)
+	const jarra4 = new Jarra(cerveza = new CervezaNegra(marca = bakalar),litrosDeJarra = 1,deLaCarpa = carpaBakalar)
+	remy.tomar(jarra3)
+	remy.tomar(jarra4)
+	
+	assert.equals(0.184, remy.alcoholIngerido())
+	assert.that(hans.seEmborracho())
+	assert.notThat(remy.seEmborracho())
+	
+	//4
+	
+	assert.that(helga.leGusta(stellaArtois))
+	assert.that(hans.leGusta(krusovice12))
+	assert.notThat(anna.leGusta(hofbrau))
+	assert.that(armand.leGusta(bakalar))
+	assert.notThat(beatriz.leGusta(caulier))
+	assert.notThat(remy.leGusta(erdinger))
+	
+	//5
+	assert.notThat(helga.quiereEntrarA(carpaErdinger))
+	assert.that(hans.quiereEntrarA(carpaStella))
+	assert.that(anna.quiereEntrarA(carpaBakalar))
+	assert.that(armand.quiereEntrarA(carpaKrusovice))
+	assert.that(beatriz.quiereEntrarA(carpaHofbrau))
+	assert.notThat(remy.quiereEntrarA(carpaCaulier))
+	
+	//6
+	beatriz.tomar(jarra3)
+	assert.that(beatriz.seEmborracho())
+	
+	assert.that(carpaErdinger.dejaEntrarA(helga))
+	assert.notThat(carpaStella.dejaEntrarA(hans))
+	assert.that(carpaBakalar.dejaEntrarA(anna))
+	assert.that(carpaKrusovice.dejaEntrarA(armand))
+	assert.notThat(carpaHofbrau.dejaEntrarA(beatriz))
+	assert.that(carpaCaulier.dejaEntrarA(remy))
+	
+	//7
+	assert.that(carpaStella.puedeEntrar(helga))
+	assert.notThat(carpaCaulier.puedeEntrar(hans))
+	assert.that(carpaBakalar.puedeEntrar(anna))
+	assert.notThat(carpaHofbrau.puedeEntrar(remy))
+	assert.that(carpaErdinger.puedeEntrar(armand))
+	assert.notThat(carpaKrusovice.puedeEntrar(beatriz))
+	
+	//8
+	helga.entrar(carpaStella)
+	anna.entrar(carpaBakalar)
+	armand.entrar(carpaErdinger)
+	
+	assert.throwsException({hans.entrar(carpaCaulier)})
+	assert.throwsException({remy.entrar(carpaHofbrau)})
+	assert.throwsException({beatriz.entrar(carpaKrusovice)})
+	
+	//9
+	assert.that(remy.leGusta(krusovice12))
+	assert.that(remy.quiereEntrarA(carpaKrusovice))
+	assert.that(carpaKrusovice.puedeEntrar(remy))
+	
+	remy.entrar(carpaKrusovice)
+	
+	carpaStella.servir(helga, 1)
+	carpaBakalar.servir(anna, 0.5)
+	carpaErdinger.servir(armand, 0.5)
+	carpaKrusovice.servir(remy, 1)
+	
+	assert.throwsException({carpaCaulier.servir(beatriz, 1)})
+	assert.throwsException({carpaHofbrau.servir(hans, 1)})
+	
+	//10
+	const ruben = new Belga(peso = 70, nivelDeAguante = 5)
+	
+	carpaStella.servir(helga, 1)
+	carpaBakalar.servir(anna, 0.5)
+	carpaErdinger.servir(armand, 1)
+	carpaKrusovice.servir(remy, 1)
+	
+	assert.equals(1, carpaStella.cantidadDeEbriosEmpedernidos())
+	assert.equals(0, carpaBakalar.cantidadDeEbriosEmpedernidos())
+	assert.equals(0, carpaErdinger.cantidadDeEbriosEmpedernidos())
+	assert.equals(1, carpaKrusovice.cantidadDeEbriosEmpedernidos())
+	
+	assert.that(carpaStella.puedeEntrar(ruben))
+	ruben.entrar(carpaStella)
+	carpaStella.servir(ruben, 0.8)
+	assert.equals(1, carpaStella.cantidadDeEbriosEmpedernidos())
+	
+	//11
+	assert.notThat(hans.esPatriota())
+	assert.notThat(beatriz.esPatriota())
+	assert.notThat(helga.esPatriota())
+	assert.that(anna.esPatriota())
+	assert.that(remy.esPatriota())
+	assert.that(armand.esPatriota())
+	assert.that(ruben.esPatriota())
+}
